@@ -1,12 +1,10 @@
 package cn.woblog.java.remotescreen;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class Main {
 
@@ -23,14 +21,21 @@ public class Main {
 
             //InputStreamReader是低层和高层串流之间的桥梁
             //client.getInputStream()从Socket取得输入串流
-            InputStreamReader streamReader = new InputStreamReader(client.getInputStream());
+            InputStream inputStream = client.getInputStream();
+//            InputStreamReader streamReader = new InputStreamReader(inputStream);
 
             //链接数据串流，建立BufferedReader来读取，将BufferReader链接到InputStreamReder
-            BufferedReader reader = new BufferedReader(streamReader);
-            String advice = reader.readLine();
+//            BufferedReader reader = new BufferedReader(streamReader);
+//            String advice = reader.readLine();
 
-            System.out.println("接收到服务器的消息 ：" + advice);
-            reader.close();
+            byte[] bytes = new byte[1024];
+            int len = 0;
+            while ((len=inputStream.read(bytes))!=-1) {
+                System.out.println(Arrays.toString(bytes));
+            }
+
+//            System.out.println("接收到服务器的消息 ：" + advice);
+//            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

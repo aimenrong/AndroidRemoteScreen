@@ -152,7 +152,6 @@ public class Main {
                 return;
             }
 
-
             if (iWindowManager == null) {
                 System.out.println("iWindowManager null");
                 return;
