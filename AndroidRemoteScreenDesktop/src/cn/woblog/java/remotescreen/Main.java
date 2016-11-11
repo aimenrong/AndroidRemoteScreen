@@ -1,5 +1,7 @@
 package cn.woblog.java.remotescreen;
 
+import cn.woblog.java.remotescreen.domain.AppInfo;
+import cn.woblog.java.remotescreen.util.JsonUtil;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -62,8 +64,34 @@ public class Main {
 
             String s = byteArrayOutputStream.toString();
             System.out.println(s);
+
+
+            AppInfo appInfo = JsonUtil.toObject(s, AppInfo.class);
+
+            startClientServer(appInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private static void startClientServer(AppInfo appInfo) {
+        //调用adb 执行
+        try {
+            String  command= "export CLASSPATH="+appInfo.getSourceDir();
+//            String command1 = "exec app_process /system/bin cn.woblog.android.remotescreen.Main";
+
+//            String c = "sh -c CLASSPATH="+appInfo.getSourceDir()+"  /system/bin  cn.woblog.android.remotescreen.Main";
+
+//            System.out.println(c);
+            Process process = Runtime.getRuntime().exec(command);
+//            Process process1 = Runtime.getRuntime().exec(c);
+//            int exitValue = process.waitFor();
+//            if (0 != exitValue) {
+//                System.out.println(""+exitValue);
+//            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
