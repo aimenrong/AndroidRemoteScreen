@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.koushikdutta.async.AsyncServer;
-import com.koushikdutta.async.http.WebSocket;
 import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
@@ -14,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 public class MainActivity extends Activity {
@@ -38,35 +38,36 @@ public class MainActivity extends Activity {
         });
         server.listen(asyncServer, DEFAULT_SOCKET_PORT);
 
-        AsyncHttpServer streamAsyncHttpServer = new AsyncHttpServer();
-        streamAsyncHttpServer.websocket("/", new AsyncHttpServer.WebSocketRequestCallback() {
-            @Override
-            public void onConnected(WebSocket webSocket, AsyncHttpServerRequest request) {
-                webSocket.send("a");
-                webSocket.send("\r\n");
-                webSocket.close();
-            }
-        });
 
-        streamAsyncHttpServer.listen(asyncServer, DEFAULT_SOCKET_PORT_STREAM);
-
-//        new Thread(new Runnable() {
+//        AsyncHttpServer streamAsyncHttpServer = new AsyncHttpServer();
+//        streamAsyncHttpServer.websocket("/", new AsyncHttpServer.WebSocketRequestCallback() {
 //            @Override
-//            public void run() {
-//                try {
-//                    ServerSocket serverSocket = new ServerSocket(45678);
-//                    while (true) {
-//                        //从请求队列中取出一个连接
-//                        Socket client = serverSocket.accept();
-//                        System.out.println("连接来了");
-//                        // 处理这次连接
-//                        processRequest(client);
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
+//            public void onConnected(WebSocket webSocket, AsyncHttpServerRequest request) {
+//                webSocket.send("a");
+//                webSocket.send("\r\n");
+//                webSocket.close();
 //            }
-//        }).start();
+//        });
+//
+//        streamAsyncHttpServer.listen(asyncServer, DEFAULT_SOCKET_PORT_STREAM);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
+                    while (true) {
+                        //从请求队列中取出一个连接
+                        Socket client = serverSocket.accept();
+                        System.out.println("连接来了");
+                        // 处理这次连接
+                        processRequest(client);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void processRequest(final Socket socket) {

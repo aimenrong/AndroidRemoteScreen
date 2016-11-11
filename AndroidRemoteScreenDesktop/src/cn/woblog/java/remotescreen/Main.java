@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            Socket client = new Socket("192.168.0.157", 45679);
+            Socket client = new Socket("192.168.1.103", 45679);
             PrintWriter printWriter = new PrintWriter(client.getOutputStream());
             System.out.println("连接已建立...");
 
