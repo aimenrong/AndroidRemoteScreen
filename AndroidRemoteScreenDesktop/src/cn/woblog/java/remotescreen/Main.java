@@ -80,7 +80,7 @@ public class Main {
             String  command= "export CLASSPATH="+appInfo.getSourceDir();
 //            String command1 = "exec app_process /system/bin cn.woblog.android.remotescreen.Main";
 
-            String c = "adb shell sh -c CLASSPATH="+appInfo.getSourceDir()+"  /system/bin  cn.woblog.android.remotescreen.Main";
+            String c = "adb shell sh -c CLASSPATH="+appInfo.getSourceDir()+"  /system/bin "+appInfo.getMainClassName();
 
 //            System.out.println(c);
             Process process = Runtime.getRuntime().exec(c);

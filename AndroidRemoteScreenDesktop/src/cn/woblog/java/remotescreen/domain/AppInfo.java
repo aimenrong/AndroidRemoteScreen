@@ -1,4 +1,4 @@
-package cn.woblog.android.remotescreen.domain;
+package cn.woblog.java.remotescreen.domain;
 
 /**
  * Created by renpingqing on 11/11/16.

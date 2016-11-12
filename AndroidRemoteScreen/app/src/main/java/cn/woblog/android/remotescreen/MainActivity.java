@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
                 try {
 
                     String sourceDir = PacketUtil.getSourceDir(MainActivity.this);
-                    AppInfo appInfo = new AppInfo(sourceDir);
+                    AppInfo appInfo = new AppInfo(sourceDir,"cn.woblog.android.remotescreen.Main");
                     String s = JsonUtil.toJson(appInfo);
 
                     ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
