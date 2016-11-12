@@ -13,8 +13,13 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * Created by renpingqing on 16/11/10.
@@ -27,6 +32,7 @@ public class Main {
 
     public static final String TAG = "TAG";
     private static final int DEFAULT_SOCKET_PORT = 45680;
+    private static final int DEFAULT_SOCKET_PORT_STREAM = 45681;
     private static IWindowManager iWindowManager;
     private static Looper looper;
 
@@ -48,7 +54,7 @@ public class Main {
             };
             Class cls = Class.forName("android.os.ServiceManager");
             Method getServiceMethod = cls.getDeclaredMethod("getService", new Class[]{String.class});
-            IWindowManager wm = IWindowManager.Stub.asInterface((IBinder) getServiceMethod.invoke(null, new Object[]{"window"}));
+            final IWindowManager wm = IWindowManager.Stub.asInterface((IBinder) getServiceMethod.invoke(null, new Object[]{"window"}));
             httpServer.get("/screenshot.jpg", new AnonymousClass5(wm));
             Log.i(TAG, "Server starting");
             if (httpServer.listen(server, DEFAULT_SOCKET_PORT) == null /*|| rawSocket == null */) {
@@ -57,6 +63,29 @@ public class Main {
                 throw new AssertionError("No server socket?");
             }
             System.out.println("Started");
+
+//            registerVideoStream()
+
+            ///////////
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
+                            Socket client = serverSocket.accept();
+                            processRequestHandler(wm, client);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+
+
+            }).start();
+///////////////////
+
             Log.i(TAG, "Waiting for exit");
             Looper.loop();
             Log.i(TAG, "Looper done");
@@ -141,6 +170,41 @@ public class Main {
 //            e.printStackTrace();
 //        }
 
+
+    }
+
+    private static void processRequestHandler(IWindowManager wm, Socket client) {
+        boolean isRun = true;
+        try {
+            while (isRun) {
+
+                OutputStream outputStream = client.getOutputStream();
+                InputStream inputStream = client.getInputStream();
+
+//                Bitmap bitmap = EncoderFeeder.screenshot(wm);
+////                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.write("ok".getBytes());
+                outputStream.flush();
+
+
+//                outputStream.write(bout.toByteArray());
+//                if (inputStream.read()!=-1) {
+//                    outputStream.close();
+//                    break;
+//                }
+//                bout.close();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            isRun = false;
+//            response.code(500);
+//            response.send(e.toString());
+        }
+    }
+
+    private static void registerVideoStream() {
 
     }
 

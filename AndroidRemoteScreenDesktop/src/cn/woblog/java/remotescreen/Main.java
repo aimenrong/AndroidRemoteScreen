@@ -91,8 +91,38 @@ public class Main {
 
             String c = "adb shell sh -c \"CLASSPATH="+appInfo.getSourceDir()+" app_process /system/bin "+appInfo.getMainClassName() +"\"";
 
-           runCommand(c);
+//           new Thread(new Runnable() {
+//               @Override
+//               public void run() {
+                   runCommand(c);
 
+//               }
+//           }).start();
+
+        //连接视频流
+
+//        try {
+//            Thread.sleep(1000);
+//
+//            Socket client = new Socket("192.168.1.100", 45681);
+//
+//            InputStream inputStream = client.getInputStream();
+//
+////            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//            byte[] bytes = new byte[1024];
+//            int len = 0;
+//            while ((len=inputStream.read(bytes))!=-1) {
+////                byteArrayOutputStream.write(bytes,0,len);
+//                System.out.println(Arrays.toString(bytes));
+//            }
+//
+////            String s = byteArrayOutputStream.toString();
+////            System.out.println(s);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -108,8 +138,8 @@ public class Main {
                 processList.add(line);
             }
             input.close();
-
-            processList.forEach(e-> System.out.println(e));
+//
+//            processList.forEach(e-> System.out.println(e));
         } catch (IOException e) {
             e.printStackTrace();
         }
