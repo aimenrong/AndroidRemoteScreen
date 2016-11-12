@@ -15,7 +15,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        
+
         connectDevices();
 
 //        runCommand("adb shell export CLASSPATH=/data/app/cn.woblog.android.remotescreen-1/base.apk");
@@ -67,8 +67,8 @@ public class Main {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] bytes = new byte[1024];
             int len = 0;
-            while ((len=inputStream.read(bytes))!=-1) {
-                byteArrayOutputStream.write(bytes,0,len);
+            while ((len = inputStream.read(bytes)) != -1) {
+                byteArrayOutputStream.write(bytes, 0, len);
 //                System.out.println(Arrays.toString(bytes));
             }
 
@@ -89,40 +89,46 @@ public class Main {
 //            String  command= "export CLASSPATH="+appInfo.getSourceDir();
 //            String command1 = "exec app_process /system/bin cn.woblog.android.remotescreen.Main";
 
-            String c = "adb shell sh -c \"CLASSPATH="+appInfo.getSourceDir()+" app_process /system/bin "+appInfo.getMainClassName() +"\"";
+        String c = "adb shell sh -c \"CLASSPATH=" + appInfo.getSourceDir() + " app_process /system/bin " + appInfo.getMainClassName() + "\"";
 
-//           new Thread(new Runnable() {
-//               @Override
-//               public void run() {
-                   runCommand(c);
-
-//               }
-//           }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runCommand(c);
+            }
+        }).start();
 
         //连接视频流
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+        try {
+            System.out.println("wait video");
+            Thread.sleep(1000);
 
-//        try {
-//            Thread.sleep(1000);
-//
-//            Socket client = new Socket("192.168.1.100", 45681);
-//
-//            InputStream inputStream = client.getInputStream();
-//
-////            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//            byte[] bytes = new byte[1024];
-//            int len = 0;
-//            while ((len=inputStream.read(bytes))!=-1) {
-////                byteArrayOutputStream.write(bytes,0,len);
-//                System.out.println(Arrays.toString(bytes));
+            Socket client = new Socket("192.168.1.100", 45681);
+
+            InputStream inputStream = client.getInputStream();
+
+            System.out.println("connect video success");
+
+//                  ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] bytes = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(bytes)) != -1) {
+//                byteArrayOutputStream.write(bytes,0,len);
+                System.out.println(Arrays.toString(bytes));
+            }
+
+//            String s = byteArrayOutputStream.toString();
+//            System.out.println(s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 //            }
-//
-////            String s = byteArrayOutputStream.toString();
-////            System.out.println(s);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+//        }).start();
 
     }
 
