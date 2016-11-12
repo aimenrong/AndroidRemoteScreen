@@ -49,7 +49,7 @@ public class Main {
 
     private static void connectDevices() {
         try {
-            Socket client = new Socket("192.168.1.103", 45679);
+            Socket client = new Socket("192.168.1.100", 45679);
 
             InputStream inputStream = client.getInputStream();
             InputStreamReader streamReader = new InputStreamReader(inputStream);
@@ -80,10 +80,10 @@ public class Main {
             String  command= "export CLASSPATH="+appInfo.getSourceDir();
 //            String command1 = "exec app_process /system/bin cn.woblog.android.remotescreen.Main";
 
-//            String c = "sh -c CLASSPATH="+appInfo.getSourceDir()+"  /system/bin  cn.woblog.android.remotescreen.Main";
+            String c = "adb shell sh -c CLASSPATH="+appInfo.getSourceDir()+"  /system/bin  cn.woblog.android.remotescreen.Main";
 
 //            System.out.println(c);
-            Process process = Runtime.getRuntime().exec(command);
+            Process process = Runtime.getRuntime().exec(c);
 //            Process process1 = Runtime.getRuntime().exec(c);
 //            int exitValue = process.waitFor();
 //            if (0 != exitValue) {
