@@ -13,8 +13,8 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -175,16 +175,18 @@ public class Main {
 
     private static void processRequestHandler(IWindowManager wm, Socket client) {
         boolean isRun = true;
-        try {
-            while (isRun) {
+        while (isRun) {
+            OutputStream outputStream = null;
+            ByteArrayOutputStream bout = null;
+            try {
+                outputStream = client.getOutputStream();
+//                InputStream inputStream = client.getInputStream();
 
-                OutputStream outputStream = client.getOutputStream();
-                InputStream inputStream = client.getInputStream();
+                Bitmap bitmap = EncoderFeeder.screenshot(wm);
+                bout = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bout);
 
-//                Bitmap bitmap = EncoderFeeder.screenshot(wm);
-////                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.write("ok".getBytes());
+                outputStream.write(bout.toByteArray());
                 outputStream.flush();
 
 
@@ -194,14 +196,25 @@ public class Main {
 //                    break;
 //                }
 //                bout.close();
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            isRun = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+                isRun = false;
+                try {
+                    outputStream.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                try {
+                    bout.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                Log.d(TAG, "close");
 //            response.code(500);
 //            response.send(e.toString());
+            }
         }
+
     }
 
     private static void registerVideoStream() {
