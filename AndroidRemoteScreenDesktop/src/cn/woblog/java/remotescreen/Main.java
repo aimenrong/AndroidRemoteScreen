@@ -8,13 +8,23 @@ import java.io.*;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
         
         connectDevices();
+
+//        runCommand("adb shell export CLASSPATH=/data/app/cn.woblog.android.remotescreen-1/base.apk");
+//        runCommand("adb shell exec app_process /system/bin cn.woblog.android.remotescreen.Main");
+//runCommand("exec ls /data/app/cn.woblog.android.remotescreen-1/base.apk");
+//        runCommand("adb shell app_process /system/bin cn.woblog.android.remotescreen.Main");
+
+//        sh -c "CLASSPATH=' + t + " " + s + " /system/bin " + n + '"
+
 //        try {
 //            Socket client = new Socket("192.168.1.103", 45679);
 //            PrintWriter printWriter = new PrintWriter(client.getOutputStream());
@@ -76,19 +86,30 @@ public class Main {
 
     private static void startClientServer(AppInfo appInfo) {
         //调用adb 执行
-        try {
-            String  command= "export CLASSPATH="+appInfo.getSourceDir();
+//            String  command= "export CLASSPATH="+appInfo.getSourceDir();
 //            String command1 = "exec app_process /system/bin cn.woblog.android.remotescreen.Main";
 
-            String c = "adb shell sh -c CLASSPATH="+appInfo.getSourceDir()+"  /system/bin "+appInfo.getMainClassName();
+            String c = "adb shell sh -c \"CLASSPATH="+appInfo.getSourceDir()+" app_process /system/bin "+appInfo.getMainClassName() +"\"";
 
-//            System.out.println(c);
+           runCommand(c);
+
+
+    }
+
+    private static void runCommand(String c) {
+        try {
+            System.out.println(c);
             Process process = Runtime.getRuntime().exec(c);
-//            Process process1 = Runtime.getRuntime().exec(c);
-//            int exitValue = process.waitFor();
-//            if (0 != exitValue) {
-//                System.out.println(""+exitValue);
-//            }
+
+            List<String> processList = new ArrayList<String>();
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = "";
+            while ((line = input.readLine()) != null) {
+                processList.add(line);
+            }
+            input.close();
+
+            processList.forEach(e-> System.out.println(e));
         } catch (IOException e) {
             e.printStackTrace();
         }

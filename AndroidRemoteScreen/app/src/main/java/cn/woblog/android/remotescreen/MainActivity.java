@@ -14,8 +14,9 @@ import cn.woblog.android.remotescreen.util.JsonUtil;
 import cn.woblog.android.remotescreen.util.PacketUtil;
 
 public class MainActivity extends Activity {
-    private static final int DEFAULT_SOCKET_PORT = 45678;
+    //    private static final int DEFAULT_SOCKET_PORT = 45678;
     private static final int DEFAULT_SOCKET_PORT_STREAM = 45679;
+    private boolean isEnableListener = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,23 +53,6 @@ public class MainActivity extends Activity {
 //
 //        streamAsyncHttpServer.listen(asyncServer, DEFAULT_SOCKET_PORT_STREAM);
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
-//                    while (true) {
-//                        //从请求队列中取出一个连接
-//                        Socket client = serverSocket.accept();
-//                        System.out.println("连接来了");
-//                        // 处理这次连接
-//                        processRequest(client);
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
     }
 
     /**
@@ -78,81 +62,35 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-
-                    String sourceDir = PacketUtil.getSourceDir(MainActivity.this);
-                    AppInfo appInfo = new AppInfo(sourceDir,"cn.woblog.android.remotescreen.Main");
-                    String s = JsonUtil.toJson(appInfo);
-
-                    ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
-                    Socket client = serverSocket.accept();
-                    OutputStream outputStream = client.getOutputStream();
-
-//                    PrintStream out = new PrintStream(outputStream);
-                    outputStream.write(s.getBytes(Charset.defaultCharset()));
-
-                    outputStream.close();
-
-//                    // 读取客户端数据
-//                    BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                    String clientInputStr = input.readLine();//这里要注意和客户端输出流的写方法对应,否则会抛 EOFException
-//                    // 处理客户端数据
-//                    System.out.println("客户端发过来的内容:" + clientInputStr);
-//
-//                    // 向客户端回复信息
-//                    OutputStream outputStream = socket.getOutputStream();
-////                    PrintStream out = new PrintStream(outputStream);
-////                     发送键盘输入的一行
-//
-////                    out.println("ha");
-//
-////                    out.close();
-//                    Random random = new Random();
-//                    byte[] bytes = new byte[1024];
-//
-//                    while (true) {
-//                        random.nextBytes(bytes);
-//                        outputStream.write(bytes);
-//                    }
-////                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                while (isEnableListener) {
+                    try {
+                        ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
+                        Socket client = serverSocket.accept();
+                        processRequestHandler(client);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+
             }
+
+
         }).start();
+
     }
 
-//    private void processRequest(final Socket socket) {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    // 读取客户端数据
-//                    BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                    String clientInputStr = input.readLine();//这里要注意和客户端输出流的写方法对应,否则会抛 EOFException
-//                    // 处理客户端数据
-//                    System.out.println("客户端发过来的内容:" + clientInputStr);
-//
-//                    // 向客户端回复信息
-//                    OutputStream outputStream = socket.getOutputStream();
-////                    PrintStream out = new PrintStream(outputStream);
-////                     发送键盘输入的一行
-//
-////                    out.println("ha");
-//
-////                    out.close();
-//                    Random random = new Random();
-//                    byte[] bytes = new byte[1024];
-//
-//                    while (true) {
-//                        random.nextBytes(bytes);
-//                        outputStream.write(bytes);
-//                    }
-////                    input.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
-//    }
+    private void processRequestHandler(Socket client) {
+        try {
+            String sourceDir = PacketUtil.getSourceDir(MainActivity.this);
+            AppInfo appInfo = new AppInfo(sourceDir, "cn.woblog.android.remotescreen.Main");
+            String s = JsonUtil.toJson(appInfo);
+            OutputStream outputStream = client.getOutputStream();
+//                    PrintStream out = new PrintStream(outputStream);
+            outputStream.write(s.getBytes(Charset.defaultCharset()));
+
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -3,9 +3,18 @@ package cn.woblog.android.remotescreen;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.view.IWindowManager;
+
+import com.koushikdutta.async.AsyncServer;
+import com.koushikdutta.async.http.server.AsyncHttpServer;
+import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
+import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Created by renpingqing on 16/11/10.
@@ -13,10 +22,11 @@ import android.view.IWindowManager;
 
 public class Main {
     //    export CLASSPATH=/data/app/cn.woblog.android.remotescreen-1.apk
+    //    export CLASSPATH=/data/app/cn.woblog.android.remotescreen-1/base.apk
 //    exec app_process /system/bin cn.woblog.android.remotescreen.Main
 
     public static final String TAG = "TAG";
-    private static final int DEFAULT_SOCKET_PORT = 53586;
+    private static final int DEFAULT_SOCKET_PORT = 45680;
     private static IWindowManager iWindowManager;
     private static Looper looper;
 
@@ -25,45 +35,45 @@ public class Main {
         Log.d(TAG, "run");
         System.out.println("run");
 
-////        try {
-////            Looper.prepare();
-////            looper = Looper.myLooper();
-////            AsyncServer server = new AsyncServer();
-////            AsyncHttpServer httpServer = new AsyncHttpServer() {
-////
-////                protected boolean onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-////                    Log.i(TAG, request.getHeaders().toString());
-////                    return super.onRequest(request, response);
-////                }
-////            };
-////            Class cls = Class.forName("android.os.ServiceManager");
-////            Method getServiceMethod = cls.getDeclaredMethod("getService", new Class[]{String.class});
-////            IWindowManager wm = IWindowManager.Stub.asInterface((IBinder) getServiceMethod.invoke(null, new Object[]{"window"}));
-////            httpServer.get("/screenshot.jpg", new AnonymousClass5(wm));
-////            Log.i(TAG, "Server starting");
-////            if (httpServer.listen(server, 53516) == null /*|| rawSocket == null */) {
-////                System.out.println("No server socket?");
-////                Log.e(TAG, "No server socket?");
-////                throw new AssertionError("No server socket?");
-////            }
-////            System.out.println("Started");
-////            Log.i(TAG, "Waiting for exit");
-////            Looper.loop();
-////            Log.i(TAG, "Looper done");
-////            server.stop();
-////            Log.i(TAG, "Done!");
-////            System.exit(0);
-////        } catch (ClassNotFoundException e) {
-////            e.printStackTrace();
-////        } catch (NoSuchMethodException e) {
-////            e.printStackTrace();
-////        } catch (IllegalAccessException e) {
-////            e.printStackTrace();
-////        } catch (InvocationTargetException e) {
-////            e.printStackTrace();
-////        }
-////
+        try {
+            Looper.prepare();
+            looper = Looper.myLooper();
+            AsyncServer server = new AsyncServer();
+            AsyncHttpServer httpServer = new AsyncHttpServer() {
+
+                protected boolean onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                    Log.i(TAG, request.getHeaders().toString());
+                    return super.onRequest(request, response);
+                }
+            };
+            Class cls = Class.forName("android.os.ServiceManager");
+            Method getServiceMethod = cls.getDeclaredMethod("getService", new Class[]{String.class});
+            IWindowManager wm = IWindowManager.Stub.asInterface((IBinder) getServiceMethod.invoke(null, new Object[]{"window"}));
+            httpServer.get("/screenshot.jpg", new AnonymousClass5(wm));
+            Log.i(TAG, "Server starting");
+            if (httpServer.listen(server, DEFAULT_SOCKET_PORT) == null /*|| rawSocket == null */) {
+                System.out.println("No server socket?");
+                Log.e(TAG, "No server socket?");
+                throw new AssertionError("No server socket?");
+            }
+            System.out.println("Started");
+            Log.i(TAG, "Waiting for exit");
+            Looper.loop();
+            Log.i(TAG, "Looper done");
+            server.stop();
+            Log.i(TAG, "Done!");
+            System.exit(0);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
 //
+
 //        try {
 //            Looper.prepare();
 //            looper = Looper.myLooper();
@@ -111,7 +121,7 @@ public class Main {
 ////                }
 ////            });
 //
-//            server.listen(asyncServer, 53516);
+//            server.listen(asyncServer, DEFAULT_SOCKET_PORT);
 //
 //            System.out.println("Started");
 //            Log.i(TAG, "Waiting for exit");
