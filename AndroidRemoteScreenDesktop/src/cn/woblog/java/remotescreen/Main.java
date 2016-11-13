@@ -1,8 +1,10 @@
 package cn.woblog.java.remotescreen;
 
 import cn.woblog.java.remotescreen.domain.AppInfo;
+import cn.woblog.java.remotescreen.ui.MainFrame;
 import cn.woblog.java.remotescreen.util.JsonUtil;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -11,9 +13,23 @@ import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
+    private static String[] mArgs;
+    private MainFrame mMainFrame;
 
-        connectDevices();
+    public static void main(String[] args) {
+        mArgs = args;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Main().initialize();
+            }
+        });
+
+
+//        connectDevices();
+
+//        new MainFrame();
+
+
 
 //        runCommand("adb shell export CLASSPATH=/data/app/cn.woblog.android.remotescreen-1/base.apk");
 //        runCommand("adb shell exec app_process /system/bin cn.woblog.android.remotescreen.Main");
@@ -111,8 +127,6 @@ public class Main {
 
             while (true) {
 
-                StringBuilder stringBuilder = new StringBuilder();
-
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
                 int c1 = 0;
@@ -154,6 +168,14 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void initialize() {
+        mMainFrame = new MainFrame(mArgs);
+        mMainFrame.setLocationRelativeTo(null);
+        mMainFrame.setVisible(true);
+        mMainFrame.setFocusable(true);
+        mMainFrame.selectDevice();
     }
 
 }

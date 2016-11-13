@@ -21,8 +21,6 @@ import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import cn.woblog.android.remotescreen.util.ByteUtil;
-
 /**
  * Created by renpingqing on 16/11/10.
  */
@@ -188,20 +186,14 @@ public class Main {
         while (isRun) {
             try {
 
-//                Bitmap bitmap = EncoderFeeder.screenshot(wm);
+                Bitmap bitmap = EncoderFeeder.screenshot(wm);
                 bout = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bout);
-                bout.write("a2343454565".getBytes());
-
-                //长度
-                int size = bout.size();
-                Log.d(TAG, "size:"+size);
-
-                byte[] sizeByte = ByteUtil.int2byte(size);
-
-                outputStream.write(sizeByte);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bout);
+//                bout.write("a2343454565".getBytes());
 
                 outputStream.write(bout.toByteArray());
+                outputStream.write("\r\n".getBytes());
+                outputStream.flush();
 
             } catch (Exception e) {
                 e.printStackTrace();
