@@ -1,11 +1,17 @@
 package cn.woblog.java.remotescreen.ui;
 
+import cn.woblog.java.remotescreen.domain.AppInfo;
+import cn.woblog.java.remotescreen.util.ByteUtil;
+import cn.woblog.java.remotescreen.util.CommandUtil;
+import cn.woblog.java.remotescreen.util.JsonUtil;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Created by renpingqing on 11/13/16.
@@ -14,6 +20,9 @@ public class MainFrame extends JFrame {
 
     private MonitorThread mMonitorThread;
     private MainPanel mPanel;
+    private InputStream inputStream;
+    private Socket client;
+//    private DataInputStream dataInputStream;
 
     public MainFrame(String[] mArgs) {
 //        this.setSize(400, 300);
@@ -47,6 +56,8 @@ public class MainFrame extends JFrame {
 
 
     public void selectDevice() {
+        connectDevices();
+
         startMonitor();
     }
 
@@ -64,6 +75,8 @@ public class MainFrame extends JFrame {
 //            mRawImageWidth = fbImage.getRawWidth();
 //            mRawImageHeight = fbImage.getRawHeight();
 //        }
+
+
         mPanel.setImage(image);
         updateSize();
     }
@@ -136,6 +149,7 @@ public class MainFrame extends JFrame {
 
         public void setImage(BufferedImage image) {
             this.image = image;
+            repaint();
         }
     }
 
@@ -159,22 +173,111 @@ public class MainFrame extends JFrame {
 //            }
 
             try {
+
                 while (mMonitorThread != null) {
+                    sleep(500);
                     final BufferedImage image = getDeviceImage();
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
                             setImage(image);
                         }
                     });
+
                 }
             } catch (IOException e) {
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
         }
 
         private BufferedImage getDeviceImage() throws IOException {
-            BufferedImage image = ImageIO.read(new File("/Users/renpingqing/Desktop/s.png"));
-            return image;
+//            inputStream = client.getInputStream();
+//            BufferedImage image = ImageIO.read(new File("/Users/renpingqing/Desktop/s.png"));
+//            System.out.println("connect video success");
+//            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//
+//            int c1 = 0;
+////            int c2 = 0;
+//            while (c1 != -1 && !(c1 == '\r')) {
+//                c1 = inputStream.read();
+//                byteArrayOutputStream.write(c1);
+//            }
+
+
+            byte[] bytes = new byte[4];
+            int length = inputStream.read(bytes);
+            if (length != -1) {
+                int dataLength = ByteUtil.byte2int(bytes);
+                System.out.println("read image size:" + dataLength);
+//
+                inputStream.skip(dataLength);
+
+//                byte[] dataByte = new byte[length];
+//                inputStream.read(dataByte);
+//
+//                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(dataByte);
+//
+//                BufferedImage image = ImageIO.read(byteArrayInputStream);
+//                return image;
+            }
+
+
+            return null;
+        }
+
+    }
+
+    private void connectDevices() {
+        try {
+            Socket client = new Socket("192.168.1.100", 45679);
+
+            InputStream inputStream = client.getInputStream();
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] bytes = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(bytes)) != -1) {
+                byteArrayOutputStream.write(bytes, 0, len);
+            }
+
+            String s = byteArrayOutputStream.toString();
+            System.out.println(s);
+
+
+            AppInfo appInfo = JsonUtil.toObject(s, AppInfo.class);
+
+            startClientServer(appInfo);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startClientServer(AppInfo appInfo) {
+        String c = "adb shell sh -c \"CLASSPATH=" + appInfo.getSourceDir() + " app_process /system/bin " + appInfo.getMainClassName() + "\"";
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                CommandUtil.runCommand(c);
+            }
+        }).start();
+
+        //获取视频流
+        try {
+            System.out.println("wait video");
+            Thread.sleep(1000);
+
+            client = new Socket("192.168.1.100", 45681);
+
+            inputStream = client.getInputStream();
+//            dataInputStream = new DataInputStream(inputStream);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
