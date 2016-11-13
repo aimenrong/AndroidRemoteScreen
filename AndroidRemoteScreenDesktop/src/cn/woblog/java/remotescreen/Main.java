@@ -1,12 +1,10 @@
 package cn.woblog.java.remotescreen;
 
 import cn.woblog.java.remotescreen.domain.AppInfo;
+import cn.woblog.java.remotescreen.util.ByteUtil;
 import cn.woblog.java.remotescreen.util.JsonUtil;
-import com.google.gson.Gson;
 
 import java.io.*;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,16 +110,34 @@ public class Main {
 
             System.out.println("connect video success");
 
-//                  ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byte[] bytes = new byte[1024];
-            int len = 0;
-            while ((len = inputStream.read(bytes)) != -1) {
-//                byteArrayOutputStream.write(bytes,0,len);
-                System.out.println(Arrays.toString(bytes));
+            byte[] sizeByte = new byte[4];
+            int readSizeByte = 0;
+
+
+            while ((readSizeByte = inputStream.read(sizeByte)) != -1) {
+                int length = ByteUtil.byte2int(sizeByte);
+                System.out.println(Arrays.toString(sizeByte));
+
+                System.out.println("length:" + length);
+
+
+                byte[] bytes = new byte[length];
+                inputStream.read(bytes);
+
+//                System.out.println("data:"+new String(bytes,0,length));
+
             }
 
-//            String s = byteArrayOutputStream.toString();
-//            System.out.println(s);
+//            System.out.println(sizeByte);
+
+//            int len = 0;
+//            while ((len = ) != -1) {
+////                byteArrayOutputStream.write(bytes,0,len);
+//                System.out.println(Arrays.toString(bytes));
+//            }
+//
+////            String s = byteArrayOutputStream.toString();
+////            System.out.println(s);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

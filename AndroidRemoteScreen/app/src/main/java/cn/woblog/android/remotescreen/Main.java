@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import cn.woblog.android.remotescreen.util.ByteUtil;
+
 /**
  * Created by renpingqing on 16/11/10.
  */
@@ -175,27 +177,32 @@ public class Main {
 
     private static void processRequestHandler(IWindowManager wm, Socket client) {
         boolean isRun = true;
-        while (isRun) {
-            OutputStream outputStream = null;
-            ByteArrayOutputStream bout = null;
-            try {
-                outputStream = client.getOutputStream();
-//                InputStream inputStream = client.getInputStream();
 
-                Bitmap bitmap = EncoderFeeder.screenshot(wm);
+        OutputStream outputStream = null;
+        ByteArrayOutputStream bout = null;
+        try {
+            outputStream = client.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        while (isRun) {
+            try {
+
+//                Bitmap bitmap = EncoderFeeder.screenshot(wm);
                 bout = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bout);
+//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bout);
+                bout.write("a2343454565".getBytes());
+
+                //长度
+                int size = bout.size();
+                Log.d(TAG, "size:"+size);
+
+                byte[] sizeByte = ByteUtil.int2byte(size);
+
+                outputStream.write(sizeByte);
 
                 outputStream.write(bout.toByteArray());
-                outputStream.flush();
 
-
-//                outputStream.write(bout.toByteArray());
-//                if (inputStream.read()!=-1) {
-//                    outputStream.close();
-//                    break;
-//                }
-//                bout.close();
             } catch (Exception e) {
                 e.printStackTrace();
                 isRun = false;
