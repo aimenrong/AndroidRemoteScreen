@@ -13,6 +13,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,6 +21,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
+
+import cn.woblog.android.remotescreen.util.ByteUtil;
 
 /**
  * Created by renpingqing on 16/11/10.
@@ -35,6 +39,8 @@ public class Main {
     private static final int DEFAULT_SOCKET_PORT_STREAM = 45681;
     private static IWindowManager iWindowManager;
     private static Looper looper;
+    private static ServerSocket serverSocket;
+    private static Socket client;
 
     public static void main(String... args) {
 
@@ -72,8 +78,8 @@ public class Main {
                 public void run() {
                     while (true) {
                         try {
-                            ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
-                            Socket client = serverSocket.accept();
+                            serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
+                            client = serverSocket.accept();
                             processRequestHandler(wm, client);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -178,23 +184,37 @@ public class Main {
 
         OutputStream outputStream = null;
         ByteArrayOutputStream bout = null;
+//        DataOutputStream dataOutputStream = null;
         try {
             outputStream = client.getOutputStream();
+//            dataOutputStream = new DataOutputStream(outputStream);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         while (isRun) {
             try {
-
                 Bitmap bitmap = EncoderFeeder.screenshot(wm);
                 bout = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bout);
-//                bout.write("a2343454565".getBytes());
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 10, bout);
+//                bout.write("ab".getBytes());
 
-                outputStream.write(bout.toByteArray());
-                outputStream.write("\r\n".getBytes());
+                byte[] buffer = ByteUtil.int2byte(bout.size());
+                Log.d(TAG, Arrays.toString(buffer));
+
+                outputStream.write(buffer);
+
+//                int len = 0;
+
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bout.toByteArray());
+
+                int len = 0;
+                byte[] bytes = new byte[4096];
+                while ((len = byteArrayInputStream.read(bytes)) != -1) {
+                    outputStream.write(bytes,0,len);
+                }
+
                 outputStream.flush();
-
             } catch (Exception e) {
                 e.printStackTrace();
                 isRun = false;
@@ -207,6 +227,20 @@ public class Main {
                     bout.close();
                 } catch (IOException e1) {
                     e1.printStackTrace();
+                }
+                if (serverSocket!=null) {
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                if (client!=null) {
+                    try {
+                        client.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
                 }
                 Log.d(TAG, "close");
 //            response.code(500);
