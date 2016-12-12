@@ -5,19 +5,20 @@ import cn.woblog.java.remotescreen.util.ByteUtil;
 import cn.woblog.java.remotescreen.util.CommandUtil;
 import cn.woblog.java.remotescreen.util.JsonUtil;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
-import java.util.Arrays;
 
 /**
  * Created by renpingqing on 11/13/16.
  */
 public class MainFrame extends JFrame {
 
+    private static final String HOST = "localhost";
     private MonitorThread mMonitorThread;
     private MainPanel mPanel;
     private InputStream inputStream;
@@ -102,6 +103,60 @@ public class MainFrame extends JFrame {
 //        if ((getWidth() != newWidth) || (getHeight() != newHeight)) {
         setSize(width, height);
 //        }
+    }
+
+    private void connectDevices() {
+        try {
+            Socket client = new Socket(HOST, 45679);
+
+            InputStream inputStream = client.getInputStream();
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] bytes = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(bytes)) != -1) {
+                byteArrayOutputStream.write(bytes, 0, len);
+            }
+
+            String s = byteArrayOutputStream.toString();
+            System.out.println(s);
+
+
+            AppInfo appInfo = JsonUtil.toObject(s, AppInfo.class);
+
+            startClientServer(appInfo);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startClientServer(AppInfo appInfo) {
+        String c = "adb shell sh -c \"CLASSPATH=" + appInfo.getSourceDir() + " app_process /system/bin " + appInfo.getMainClassName() + "\"";
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                CommandUtil.runCommand(c);
+            }
+        }).start();
+
+        //获取视频流
+        try {
+            System.out.println("wait video");
+            Thread.sleep(1000);
+
+            client = new Socket(HOST, 45681);
+
+            inputStream = client.getInputStream();
+//            dataInputStream = new DataInputStream(inputStream);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public class MainPanel extends JPanel {
@@ -224,60 +279,6 @@ public class MainFrame extends JFrame {
 
 
             return null;
-        }
-
-    }
-
-    private void connectDevices() {
-        try {
-            Socket client = new Socket("192.168.1.100", 45679);
-
-            InputStream inputStream = client.getInputStream();
-
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byte[] bytes = new byte[1024];
-            int len = 0;
-            while ((len = inputStream.read(bytes)) != -1) {
-                byteArrayOutputStream.write(bytes, 0, len);
-            }
-
-            String s = byteArrayOutputStream.toString();
-            System.out.println(s);
-
-
-            AppInfo appInfo = JsonUtil.toObject(s, AppInfo.class);
-
-            startClientServer(appInfo);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void startClientServer(AppInfo appInfo) {
-        String c = "adb shell sh -c \"CLASSPATH=" + appInfo.getSourceDir() + " app_process /system/bin " + appInfo.getMainClassName() + "\"";
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                CommandUtil.runCommand(c);
-            }
-        }).start();
-
-        //获取视频流
-        try {
-            System.out.println("wait video");
-            Thread.sleep(1000);
-
-            client = new Socket("192.168.1.100", 45681);
-
-            inputStream = client.getInputStream();
-//            dataInputStream = new DataInputStream(inputStream);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
     }
