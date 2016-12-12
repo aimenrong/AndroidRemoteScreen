@@ -17,6 +17,7 @@ public class MainActivity extends Activity {
     //    private static final int DEFAULT_SOCKET_PORT = 45678;
     private static final int DEFAULT_SOCKET_PORT_STREAM = 45679;
     private boolean isEnableListener = true;
+    private Socket client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +61,15 @@ public class MainActivity extends Activity {
      */
     private void requestStartServer() {
         new Thread(new Runnable() {
+
+            private ServerSocket serverSocket;
+
             @Override
             public void run() {
                 while (isEnableListener) {
                     try {
-                        ServerSocket serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
-                        Socket client = serverSocket.accept();
+                        serverSocket = new ServerSocket(DEFAULT_SOCKET_PORT_STREAM);
+                        client = serverSocket.accept();
                         processRequestHandler(client);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -92,5 +96,11 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
     }
 }

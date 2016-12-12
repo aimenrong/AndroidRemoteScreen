@@ -8,10 +8,9 @@ import cn.woblog.java.remotescreen.util.JsonUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Created by renpingqing on 11/13/16.
@@ -23,6 +22,7 @@ public class MainFrame extends JFrame {
     private MainPanel mPanel;
     private InputStream inputStream;
     private Socket client;
+    private BufferedReader br;
 //    private DataInputStream dataInputStream;
 
     public MainFrame(String[] mArgs) {
@@ -148,6 +148,10 @@ public class MainFrame extends JFrame {
             client = new Socket(HOST, 45681);
 
             inputStream = client.getInputStream();
+
+            DataInputStream dis = new DataInputStream(inputStream);
+            br =new BufferedReader(new InputStreamReader(dis,"utf-8"));
+
 //            dataInputStream = new DataInputStream(inputStream);
 
 
@@ -260,9 +264,27 @@ public class MainFrame extends JFrame {
 //            }
 
 
-            byte[] bytes = new byte[4];
-            int length = inputStream.read(bytes);
-            if (length != -1) {
+//            byte[] bytes = new byte[4];
+//            int length = inputStream.read(bytes);
+//            if (length != -1) {
+//                int dataLength = ByteUtil.byte2int(bytes);
+//                System.out.println("read image size:" + dataLength);
+////
+//                inputStream.skip(dataLength);
+//
+////                byte[] dataByte = new byte[length];
+////                inputStream.read(dataByte);
+////
+////                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(dataByte);
+////
+////                BufferedImage image = ImageIO.read(byteArrayInputStream);
+////                return image;
+//            }
+
+            String s = br.readLine();
+            byte[] bytes = s.getBytes("utf-8");
+            System.out.println("read image byte:" + Arrays.toString(bytes));
+            if (true) {
                 int dataLength = ByteUtil.byte2int(bytes);
                 System.out.println("read image size:" + dataLength);
 //
@@ -276,7 +298,6 @@ public class MainFrame extends JFrame {
 //                BufferedImage image = ImageIO.read(byteArrayInputStream);
 //                return image;
             }
-
 
             return null;
         }

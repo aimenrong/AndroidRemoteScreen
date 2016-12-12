@@ -13,10 +13,12 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
@@ -184,9 +186,12 @@ public class Main {
 
         OutputStream outputStream = null;
         ByteArrayOutputStream bout = null;
+        PrintWriter pw = null;
 //        DataOutputStream dataOutputStream = null;
         try {
             outputStream = client.getOutputStream();
+            DataOutputStream dos = new DataOutputStream(outputStream);
+            pw = new PrintWriter(new OutputStreamWriter(dos, "utf-8"), true);
 //            dataOutputStream = new DataOutputStream(outputStream);
 
         } catch (IOException e) {
@@ -199,22 +204,33 @@ public class Main {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 10, bout);
 //                bout.write("ab".getBytes());
 
-                byte[] buffer = ByteUtil.int2byte(bout.size());
+                int size = bout.size();
+                byte[] buffer = ByteUtil.int2byte(size);
+                Log.d(TAG, "image size:" + size);
                 Log.d(TAG, Arrays.toString(buffer));
 
-                outputStream.write(buffer);
+//                outputStream.write(buffer);
+
+                pw.println(buffer);
+
+
 
 //                int len = 0;
 
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bout.toByteArray());
+                byte[] bytes = bout.toByteArray();
 
-                int len = 0;
-                byte[] bytes = new byte[4096];
-                while ((len = byteArrayInputStream.read(bytes)) != -1) {
-                    outputStream.write(bytes,0,len);
-                }
+//                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream();
 
-                outputStream.flush();
+//                int len = 0;
+//                byte[] bytes = new byte[4096];
+//                while ((len = byteArrayInputStream.read(bytes)) != -1) {
+//                    outputStream.write(bytes,0,len);
+//                }
+//
+//                outputStream.flush();
+//                pw.println(bytes);
+
+                pw.flush();
             } catch (Exception e) {
                 e.printStackTrace();
                 isRun = false;
